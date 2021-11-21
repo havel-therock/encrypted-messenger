@@ -1,0 +1,216 @@
+#          _ _   _
+#     __ _(_) |_(_) __ _ _ __   ___  _ __ ___
+#    / _` | | __| |/ _` | '_ \ / _ \| '__/ _ \
+#   | (_| | | |_| | (_| | | | | (_) | | |  __/
+#  (_)__, |_|\__|_|\__, |_| |_|\___/|_|  \___|
+#    |___/         |___/
+#
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+# Custom trash folders
+Ignore/
+ignore/
+Trash/
+trash/
+Syff/
+syff/
+Inne/
+inne/
+BAD/
+bad/
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+### Linux ###
+
+# Temporary files (e.g. when editing with nano)
+*~
+*.swp
+
+# Vim swap files
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+!*.svg
+
+# Misc.
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+### Windows ###
+
+# Folder thumbnails and config
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+
+# Other stuff
+*.stackdump
+$RECYCLE.BIN/
+*.lnk
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+### PyCharm ###
+
+# User-specific stuff
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+.idea/**/aws.xml
+
+# Generated and high-churn files
+.idea/**/contentModel.xml
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/dbnavigator.xml
+
+# Build tools
+.idea/**/gradle.xml
+.idea/**/libraries
+cmake-build-*/
+
+# Plugins
+atlassian-ide-plugin.xml
+.idea/**/mongoSettings.xml
+.idea/**/markdown-navigator.xml
+.idea/**/markdown-navigator-enh.xml
+.idea/**/markdown-navigator/
+.idea/**/sonarIssues.xml
+.idea/**/sonarlint/
+.idea/codestream.xml
+.idea/replstate.xml
+.idea_modules/
+
+# Others
+.idea/$CACHE_FILE$
+.idea/httpRequests
+*.iws
+
+# Files modified on every interpreter change
+encrypted-messenger.iml
+misc.xml
+
+### Spyder ###
+
+# Project settings
+.spyderproject
+.spyproject
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+### Python ###
+
+# Bytecode and C extensions
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# pyenv
+# For a library or package, you might want to ignore these files since the code is
+# intended to run in multiple environments; otherwise, check them in:
+.python-version
+
+# pipenv
+# According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
+# However, in case of collaboration, if having platform-specific dependencies or dependencies
+# having no cross-platform support, pipenv may install dependencies that don't work, or not
+# install all needed dependencies.
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# Created with the help of
+# https://www.toptal.com/developers/gitignore/api/pycharm,python,linux,vim,windows
