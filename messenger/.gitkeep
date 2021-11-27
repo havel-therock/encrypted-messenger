@@ -1,1 +1,7 @@
 project source code under this directory
+
+Locking mechanism:
+        # lock = threading.Lock()
+        # lock.acquire()
+        # locked_function()
+        # lock.release()
