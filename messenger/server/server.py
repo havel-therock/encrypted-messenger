@@ -17,7 +17,7 @@ class Server:
         # this sometimes return loopback ip addres instead of just private network ip. 127... instead of 196
         # to work this from internet, check for a public IP and put it here
         self.ip_address = socket.gethostbyname(socket.gethostname())
-        self.port = 6666
+        self.port = 6667
         self.server_running = True
 
         if "header_size" in kwargs:
@@ -86,9 +86,9 @@ class Server:
             if msg_length:
                 msg_length = int(msg_length)
                 pickled_msg = conn.recv(msg_length)  # is it possible to stuck here if no message was sent after sending the header
-                self.handle_action(pickled_msg, ip_addr)
-            connected = self.check_connection(ip_addr)
-        self.remove_user(ip_addr)
+                self.handle_action(pickled_msg, ip_addr,conn)
+            #connected = self.check_connection(ip_addr)
+        #self.remove_user(ip_addr)
         conn.close()
 
     def handle_action(self, pickled_client_request, ip_addr, conn):

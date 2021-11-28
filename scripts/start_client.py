@@ -1,7 +1,7 @@
 import os
 import sys
 from pathlib import Path
-from messenger.client.test_client import TestClient
+from messenger.client.client import Client
 
 if __name__ == "__main__":
     # SETUP
@@ -10,6 +10,6 @@ if __name__ == "__main__":
     sys.path.append(path.parent.absolute())
     # END OF SETUP
 
-    client = TestClient()
+    client = Client()
     client.start()
     #  client.send_LOGIN_request()
