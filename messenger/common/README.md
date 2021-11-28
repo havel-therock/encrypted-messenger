@@ -1,10 +1,7 @@
 # Structure of communication
 
-Two mains object to communicate:
-1. ClientRequest
-2. ServerRequest
-
-These classes contain fields:\
+Request object to communicate.
+It contains fields:\
     request_type  < ENUM >\
     content < Any class > \
-    content class should contain all necessary data for completion of request type 
+    content class should contains all necessary data to complete action of type passed in request type 
