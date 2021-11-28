@@ -6,6 +6,11 @@ class Mess:
     self.message = message
 
 
+class LogIn:
+    def __init__(self, email, passwd):
+        self.email = email
+        self.passwd = passwd
+
 class Request:
     def __init__(self, request_type, content):
         self.request_type = request_type  # class RequestType

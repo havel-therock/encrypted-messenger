@@ -18,6 +18,7 @@ class Server:
         # to work this from internet, check for a public IP and put it here
         self.ip_address = socket.gethostbyname(socket.gethostname())
         self.port = 6666
+        self.server_running = True
 
         if "header_size" in kwargs:
             self.header_size = kwargs["header_size"]
@@ -36,11 +37,26 @@ class Server:
         print("[INFO:SERVER] Starting server...")
         server.listen()
         print(f"[INFO:SERVER] Server is listening on {self.ip_address}")
-        while True:
+
+        #  socket.setdefaulttimeout(None)  <-- default value
+
+        # socket.settimeout(0.0001)
+        while self.server_running:
+
             conn, ip_addr = server.accept()
+            #print(conn)
+            #print(ip_addr)
+            #  if conn is not None and ip_addr is not None:
             thread = threading.Thread(target=self.handle_client, args=(conn, ip_addr))
             thread.start()
             print(f"[INFO] ACTIVE CONNECTIONS: {threading.active_count() - 1}")
+                # conn = None
+                # ip_addr = None
+
+    def shut_down(self):
+        # clean_up all clients....
+        # disconnect them close connection to data base ensure every process that is running is stopped properly
+        self.server_running = False
 
     def get_clients_by_ip(self, ip_addr):
         for user in self.active_users:
@@ -69,7 +85,7 @@ class Server:
             msg_length = conn.recv(self.header_size).decode(self.format)
             if msg_length:
                 msg_length = int(msg_length)
-                pickled_msg = conn.recv(msg_length)
+                pickled_msg = conn.recv(msg_length)  # is it possible to stuck here if no message was sent after sending the header
                 self.handle_action(pickled_msg, ip_addr)
             connected = self.check_connection(ip_addr)
         self.remove_user(ip_addr)
