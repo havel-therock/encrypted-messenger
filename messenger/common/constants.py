@@ -1,10 +1,14 @@
-from enum import Enum
+import enum
+from enum import Enum, auto
 
 
-class ClientRequestType(Enum):
-    LOG_IN = 1
-    REGISTER = 2
-    SEND_MSG = 3
-    DISCONNECT = 4
+class RequestType(Enum):
 
+    #  Clients requests for server
+    LOG_IN = auto
+    REGISTER = auto
+    SEND_MSG = auto
+    DISCONNECT = auto
 
+    #  Server requests for client
+    UPDATE_CONVERSATION = auto

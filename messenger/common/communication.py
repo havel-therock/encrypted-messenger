@@ -6,16 +6,8 @@ class Mess:
     self.message = message
 
 
-class Content:
-    def __init__(self):
-        pass
-
-
-class ClientRequest:
-    def __init__(self, request_type, content, receiver):  # request_type mandatory
-        self.request_type = request_type  # class ClientRequestType
+class Request:
+    def __init__(self, request_type, content):
+        self.request_type = request_type  # class RequestType
         self.content = content  # Any class
 
-
-class ServerRequest:
-    pass

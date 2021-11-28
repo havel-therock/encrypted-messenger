@@ -2,7 +2,7 @@ import socket
 import threading
 import hashlib
 import pickle
-from messenger.common.constants import ClientRequestType as req_type
+from messenger.common.constants import RequestType
 
 
 class Server:
@@ -79,9 +79,9 @@ class Server:
         client_request = pickle.loads(pickled_client_request)
         # dev note: python 3.10 has switch statements... older versions doesn't
         req = client_request.request_type
-        if req == req_type.LOG_IN:
+        if req == RequestType.LOG_IN:
             self.action_login(client_request, ip_addr, conn)
-        elif req == req_type.DISCONNECT:
+        elif req == RequestType.DISCONNECT:
             self.action_disconnect(ip_addr)
         else:  # if clients talk non-existing requests -> disconnect them
             self.action_disconnect(ip_addr)
