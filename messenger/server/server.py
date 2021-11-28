@@ -95,12 +95,17 @@ class Server:
         client_request = pickle.loads(pickled_client_request)
         # dev note: python 3.10 has switch statements... older versions doesn't
         req = client_request.request_type
-        if req == RequestType.LOG_IN:
-            self.action_login(client_request, ip_addr, conn)
-        elif req == RequestType.DISCONNECT:
+        ####
+        print(client_request.request_type)
+        print(client_request.content)
+        ####
+        #if req == RequestType.LOG_IN:
+        #    self.action_login(client_request, ip_addr, conn)
+        #el
+        if req == RequestType.DISCONNECT:
             self.action_disconnect(ip_addr)
-        else:  # if clients talk non-existing requests -> disconnect them
-            self.action_disconnect(ip_addr)
+        #else:  # if clients talk non-existing requests -> disconnect them
+        #    self.action_disconnect(ip_addr)
 
     def action_login(self, client_request, ip_addr, conn):
         user = self.get_clients_by_ip(ip_addr)
