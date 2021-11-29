@@ -5,13 +5,17 @@ def scrub(query_data):
     return ''.join(chr for chr in query_data if chr.isalnum())
 
 
+def connect():
+    return sqlite3.connect('clientDB.db')
+
+
 def setup_database():
-    con = sqlite3.connect('testDB.db')
+    con = connect()
     c = con.cursor()
     c.execute('''
               CREATE TABLE IF NOT EXISTS conversations
               ([name] TEXT PRIMARY KEY, 
-              [users] INTEGER,
+              [users] TEXT,
               [no_history] INTEGER )
               ''')
     con.commit()
@@ -19,9 +23,8 @@ def setup_database():
 
 
 def start_conversation(name, creator_id, creator_name, no_history):
-    con = sqlite3.connect('testDB.db')
+    con = connect()
     c = con.cursor()
-    ct = c.execute('SELECT COUNT(*) from conversations').fetchone()[0] + 1
     name_clean = scrub(name)
     creator_id_clean = int(scrub(str(creator_id)))
     creator_name_clean = scrub(creator_name)
@@ -34,7 +37,7 @@ def start_conversation(name, creator_id, creator_name, no_history):
 
     query = '''
               CREATE TABLE IF NOT EXISTS {}
-              ([message_id] INTEGER PRIMARY KEY, 
+              ([message_id] INTEGER PRIMARY KEY AUTOINCREMENT, 
               [sender] INTEGER,
               [time] INTEGER,  
               [data] TEXT)
@@ -59,8 +62,29 @@ def start_conversation(name, creator_id, creator_name, no_history):
     con.close()
 
 
+def delete_conversation(name):
+    con = connect()
+    c = con.cursor()
+    name_clean = scrub(name)
+    users = name_clean + "_users"
+    c.execute('''
+              DELETE FROM conversations
+              WHERE name = ?
+              ''', name_clean)
+    query = '''
+              DROP TABLE {}
+              '''.format(name_clean)
+    c.execute(query)
+    query = '''
+              DROP TABLE {}
+              '''.format(users)
+    c.execute(query)
+    con.commit()
+    con.close()
+
+
 def add_user(name, user_id, user_name):
-    con = sqlite3.connect('testDB.db')
+    con = connect()
     c = con.cursor()
     name_clean = scrub(name)
     users = name_clean + "_users"
@@ -88,7 +112,7 @@ def add_user(name, user_id, user_name):
 
 
 def change_status(name, user_id, new_status):
-    con = sqlite3.connect('testDB.db')
+    con = connect()
     c = con.cursor()
     name_clean = scrub(name)
     users = name_clean + "_users"
@@ -104,7 +128,7 @@ def change_status(name, user_id, new_status):
 
 
 def remove_user(name, user_id):
-    con = sqlite3.connect('testDB.db')
+    con = connect()
     c = con.cursor()
     name_clean = scrub(name)
     users = name_clean + "_users"
@@ -118,9 +142,58 @@ def remove_user(name, user_id):
     con.close()
 
 
+def save_message(name, sender, time, data):
+    con = connect()
+    c = con.cursor()
+    name_clean = scrub(name)
+    query = '''
+          INSERT INTO {} (sender, time, data)
+          VALUES (?, ?, ?)
+          '''.format(name_clean)
+    c.execute(query, [sender, time, data])
+
+    con.commit()
+    con.close()
+
+
+def delete_message(name, msg_id):
+    con = connect()
+    c = con.cursor()
+    name_clean = scrub(name)
+    query = '''
+              DELETE FROM {} 
+              WHERE message_id = ?
+              '''.format(name_clean)
+    c.execute(query, [msg_id])
+
+    con.commit()
+    con.close()
+
+
+def get_message(name, msg_id):
+    con = connect()
+    c = con.cursor()
+    name_clean = scrub(name)
+    query = '''
+              SELECT * FROM {} 
+              WHERE message_id = ?
+              '''.format(name_clean)
+    return c.execute(query, [msg_id]).fetchone()
+
+
+def get_all_messages(name):
+    con = connect()
+    c = con.cursor()
+    name_clean = scrub(name)
+    query = '''
+              SELECT * FROM {} 
+              '''.format(name_clean)
+    return c.execute(query).fetchall()
+
+
 if __name__ == "__main__":
-    # setup_database()
-    # start_conversation("test", 0, "nm", 0)
-     print(add_user("test", 2, "nts"))
-    # change_status("test", 1, 0)
-    # remove_user("test", 2)
+    # con = connect()
+    # c = con.cursor()
+    # print(c.execute('SELECT * FROM  "t"').fetchall())
+
+    print("--------------")
