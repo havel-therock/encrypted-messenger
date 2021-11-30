@@ -113,6 +113,7 @@ class Client:
             #daniel save to database
             clientDBHandler.save_message(server_request.content.msg_sender,
                                          server_request.content.msg_sender,
+                                         server_request.content.msg_reciver,
                                          round(time.time() * 1000),
                                          server_request.content.message)
             self.msgDatabase.append(server_request.content)
