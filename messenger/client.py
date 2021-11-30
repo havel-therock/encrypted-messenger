@@ -74,6 +74,11 @@ class Client:
             else:
                 m = Mess(self.nickname, receiver, "hash", msg)
                 self.send_request(RequestType.SEND_MSG, m)
+                clientDBHandler.save_message(self.nickname,
+                                             self.nickname,
+                                             receiver,
+                                             round(time.time() * 1000),
+                                             msg)
 
         print("[INFO:CLIENT] Correctly disconnected")
 
