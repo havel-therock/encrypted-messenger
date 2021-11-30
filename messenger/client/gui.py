@@ -66,10 +66,12 @@ class Window(QWidget, Client):
         text=self.chatTextField.text()
         tmp = text.split(maxsplit=1)
         if len(tmp)>1:
-            self.dupsko(tmp[0], tmp[1])
+            self.print_msg(tmp[0], tmp[1])
+            m = Mess(self.nickname, tmp[0], "hash", tmp[1])
+            self.send_request(RequestType.SEND_MSG, m)
             self.chatTextField.setText("")
         
-    def dupsko(self,auth,msg):
+    def print_msg(self,auth,msg):
         text=auth + " > " + msg
         font=self.chat.font()
         font.setPointSize(13)
@@ -77,23 +79,8 @@ class Window(QWidget, Client):
         textFormatted='{:<80}'.format(text)
         self.chat.append(textFormatted)
 
-    def handle_action(self, pickled_server_request):
-        server_request = pickle.loads(pickled_server_request)
-        # dev note: python 3.10 has switch statements... older versions doesn't
-        req = server_request.request_type
-
-        if req == RequestType.LOG_IN:
-            a = server_request.content.email
-            b = server_request.content.passwd
-            self.dupsko(a, b)
-            if a == "OK":
-                self.loggedInFlag = True
-        elif req == RequestType.SEND_MSG:
-            #display message and add to database
-            #daniel
-            dupsko(req.content.msg_sender, req.content.message)
-            self.msgDatabase.append(req.content)
-            pass
+#    def print_msg(self, auth, msg):
+#        dupsko(req.content.msg_sender, req.content.message)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

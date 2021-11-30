@@ -33,10 +33,10 @@ class Client:
 
         while not self.loggedInFlag:
             print("Enter your nickname")
-            nickname = input()
+            self.nickname = input()
             print("Enter your password")
             password = input()
-            self.send_request(RequestType.LOG_IN, LogIn(nickname, password))
+            self.send_request(RequestType.LOG_IN, LogIn(self.nickname, password))
 
 
             wait_iterator = 0
@@ -64,7 +64,7 @@ class Client:
                 self.loggedInFlag = False
                 self.receiverON = False
             else:
-                m = Mess(nickname, receiver, "hash", msg)
+                m = Mess(self.nickname, receiver, "hash", msg)
                 self.send_request(RequestType.SEND_MSG, m)
 
         print("[INFO:CLIENT] Correctly disconnected")
@@ -98,14 +98,16 @@ class Client:
             print("ERROR: USERNAME_TAKEN")
         elif req == RequestType.NEW_MESSAGE:
             #display message and add to database
-            print(server_request.content)
-            print(server_request.content.msg_sender + " > " + server_request.content.message)
-            #print on GUI
+            #print(server_request.content)
+            self.print_msg(server_request.content.msg_sender,
+                           server_request.content.message)
             #daniel save to database
             self.msgDatabase.append(server_request.content)
         else:
             print("unknown request type")
-    ############# BASE ABOVE
+
+    def print_msg(self,auth,msg):
+        print(auth + " > " + msg)
 
     def send_LOGIN_request(self):
         self.send_request(RequestType.LOG_IN, LogIn("client@gmail.com", "super-tajne-hasło"))
