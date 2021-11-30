@@ -70,6 +70,11 @@ class Window(QWidget, Client):
             m = Mess(self.nickname, tmp[0], "hash", tmp[1])
             self.send_request(RequestType.SEND_MSG, m)
             self.chatTextField.setText("")
+            clientDBHandler.save_message(self.nickname,
+                                         self.nickname,
+                                         tmp[0],
+                                         round(time.time() * 1000),
+                                         tmp[1])
         
     def print_msg(self,sender,receiver,msg):
         text = "[{} -> {}] {}".format(sender,receiver,msg)
@@ -134,13 +139,15 @@ class Window(QWidget, Client):
 
         # after log_in
         print("[INFO:CLIENT] After log_in...")
+
         # daniel wczytanie bazy do msgDatabase i wypisanie jej na ekran
+        tmp = clientDBHandler.get_all_data()
+        for msg in tmp:
+            self.msgDatabase.append(msg)
+#            print(msg)
+            if self.nickname in msg[1:3]:
+                self.print_msg(msg[1],msg[2],msg[4])
 
-
-
-
-#    def print_msg(self, auth, msg):
-#        dupsko(req.content.msg_sender, req.content.message)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
