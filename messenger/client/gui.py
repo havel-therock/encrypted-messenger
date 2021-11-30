@@ -1,95 +1,103 @@
 #!/usr/bin/env python3
 
-#from PyQt5.QtPrintSupport import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-import sys
-import os
+import sys,time
+from PyQt5 import QtGui
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QScrollBar,QSplitter,QTableWidgetItem,QTableWidget,QComboBox,QVBoxLayout,QGridLayout,QDialog,QWidget, QPushButton, QApplication, QMainWindow,QAction,QMessageBox,QLabel,QTextEdit,QProgressBar,QLineEdit
+from PyQt5.QtCore import QCoreApplication
+import socket
+from threading import Thread 
+from socketserver import ThreadingMixIn 
+from client import *
 
-#-------------------------------#
+import socket
+import hashlib
+import pickle
+import threading
+import time
+from pathlib import Path
+from common.constants import SERVER, PORT, FORMAT, HEADER_SIZE
+from common.communication import Request, Mess, LogIn
+from common.constants import RequestType
 
-# Creating main window class
-class MainWindow(QMainWindow):
- 
-    # constructor
-    def __init__(self, *args, **kwargs):
-        super(MainWindow, self).__init__(*args, **kwargs)
- 
-        # setting window geometry
-        self.setGeometry(100, 100, 600, 400)
- 
-        # creating a layout
-        layout = QVBoxLayout()
- 
-        # creating a QPlainTextEdit object
-        self.editor = QPlainTextEdit()
- 
-        # setting font to the editor
-        fixedfont = QFontDatabase.systemFont(QFontDatabase.FixedFont)
-        fixedfont.setPointSize(12)
-        self.editor.setFont(fixedfont)
- 
-        # adding editor to the layout
-        layout.addWidget(self.editor)
- 
-        # creating a QWidget layout
-        container = QWidget()
- 
-        # setting layout to the container
-        container.setLayout(layout)
- 
-        # making container as central widget
-        self.setCentralWidget(container)
- 
-        # calling update title method
-        self.update_title()
- 
-        # showing all the components
-        self.show()
- 
-    # creating dialog critical method
-    # to show errors
-    def dialog_critical(self, s):
- 
-        # creating a QMessageBox object
-        dlg = QMessageBox(self)
- 
-        # setting text to the dlg
-        dlg.setText(s)
- 
-        # setting icon to it
-        dlg.setIcon(QMessageBox.Critical)
- 
-        # showing it
-        dlg.show()
- 
-    # update title method
-    def update_title(self):
- 
-        # setting window title with prefix as file name
-        # suffix aas PyQt5 Notepad
-        self.setWindowTitle("{} - Crypto-Messenger".format('empty chat'))
+tcpClientA=None
 
-#-------------------------------#
+class Window(QWidget, Client):
+    def __init__(self):
+        super().__init__()
+        self.chatTextField=QLineEdit(self)
+        self.chatTextField.resize(480,100)
+        self.chatTextField.move(10,350)
+        
+        self.btnSend=QPushButton("Send",self)
+        self.btnSend.resize(480,30)
+        self.btnSendFont=self.btnSend.font()
+        self.btnSendFont.setPointSize(15)
+        self.btnSend.setFont(self.btnSendFont)
+        self.btnSend.move(10,460)
+        self.btnSend.setStyleSheet("background-color: #F7CE16")
+        self.btnSend.clicked.connect(self.send)
 
-def main():
+        self.chatBody=QVBoxLayout(self)
+        # self.chatBody.addWidget(self.chatTextField)
+        # self.chatBody.addWidget(self.btnSend)
+        # self.chatWidget.setLayout(self.chatBody)
+        splitter=QSplitter(QtCore.Qt.Vertical)
 
-	app = QApplication(sys.argv)
+        self.chat = QTextEdit()
+        self.chat.setReadOnly(True)
 
-	# wikipedia's part
-#	root = QWidget()
-#	root.resize(320, 240)
-#	root.setWindowTitle("Hello, World!")
-#	root.show()
+        splitter.addWidget(self.chat)
+        splitter.addWidget(self.chatTextField)
+        splitter.setSizes([400,100])
 
-	app.setApplicationName("PyQt5-Note")
-	#window = ClientGui()
-	window = MainWindow()
+        splitter2=QSplitter(QtCore.Qt.Vertical)
+        splitter2.addWidget(splitter)
+        splitter2.addWidget(self.btnSend)
+        splitter2.setSizes([200,10])
 
-	sys.exit(app.exec_())
-	
+        self.chatBody.addWidget(splitter2)
 
-# Execute the script
+
+        self.setWindowTitle("Chat Application")
+        self.resize(500, 500)
+
+    def send(self):
+        text=self.chatTextField.text()
+        tmp = text.split(maxsplit=1)
+        if len(tmp)>1:
+            self.dupsko(tmp[0], tmp[1])
+            self.chatTextField.setText("")
+        
+    def dupsko(self,auth,msg):
+        text=auth + " > " + msg
+        font=self.chat.font()
+        font.setPointSize(13)
+        self.chat.setFont(font)
+        textFormatted='{:<80}'.format(text)
+        self.chat.append(textFormatted)
+
+    def handle_action(self, pickled_server_request):
+        server_request = pickle.loads(pickled_server_request)
+        # dev note: python 3.10 has switch statements... older versions doesn't
+        req = server_request.request_type
+
+        if req == RequestType.LOG_IN:
+            a = server_request.content.email
+            b = server_request.content.passwd
+            self.dupsko(a, b)
+            if a == "OK":
+                self.loggedInFlag = True
+        elif req == RequestType.SEND_MSG:
+            #display message and add to database
+            #daniel
+            dupsko(req.content.msg_sender, req.content.message)
+            self.msgDatabase.append(req.content)
+            pass
+
 if __name__ == '__main__':
-	main()
+    app = QApplication(sys.argv)
+    window = Window()
+    window.show()
+    window.start()
+    sys.exit(app.exec_())
