@@ -12,7 +12,7 @@ from messenger.common.constants import RequestType
 class Client:
     loggedInFlag = False
     msgDatabase= list()
-    connected = True
+    receiverON = True
 
     def __init__(self):
         self.tcp_client = None
@@ -21,12 +21,13 @@ class Client:
     def start(self):
 
         address = (SERVER, PORT)
-        #daniel wczytanie bazy do msgDatabase i wypisanie jej na ekran
+
         print("[INFO:CLIENT] Starting client app...")
         self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         print("[INFO:CLIENT] Connecting to server...")
         self.tcp_client.connect(address)
 
+        self.receiverON = True
         thread = threading.Thread(target=self.client_receiver, args=(self.tcp_client, self.loggedInFlag))
         thread.start()
 
@@ -37,9 +38,6 @@ class Client:
             password = input()
             self.send_request(RequestType.LOG_IN, LogIn(nickname, password))
 
-            #do wywalenia
-            self.loggedInFlag = True
-            self.connected = True
 
             wait_iterator = 0
             while not self.loggedInFlag and wait_iterator < 10:
@@ -48,10 +46,11 @@ class Client:
 
             if wait_iterator >= 10:
                 print("server unreachable or wrong login data")
+                #gui pop
 
         # after log_in
         print("[INFO:CLIENT] After log_in...")
-
+        # daniel wczytanie bazy do msgDatabase i wypisanie jej na ekran
         while self.loggedInFlag:
             print("Enter receiver")
             receiver = input()
@@ -63,7 +62,7 @@ class Client:
                 self.send_request(RequestType.DISCONNECT, m)
                 self.tcp_client.close()
                 self.loggedInFlag = False
-                self.connected = False
+                self.receiverON = False
             else:
                 m = Mess(nickname, receiver, "hash", msg)
                 self.send_request(RequestType.SEND_MSG, m)
@@ -81,7 +80,7 @@ class Client:
 
     def client_receiver(self, conn,n):
         print(f"[RECEIVER INFO] receiver starting.")
-        while self.connected:
+        while self.receiverON:
             msg_length = conn.recv(HEADER_SIZE).decode(FORMAT)
             if msg_length:
                 msg_length = int(msg_length)
@@ -93,18 +92,19 @@ class Client:
         # dev note: python 3.10 has switch statements... older versions doesn't
         req = server_request.request_type
 
-        if req == RequestType.LOG_IN:
-            a = server_request.content.nickname
-            b = server_request.content.passwd
-            if a == "OK":
-                self.loggedInFlag = True
-        elif req == RequestType.SEND_MSG:
+        if req == RequestType.LOG_IN__OK:
+            self.loggedInFlag = True
+        elif req == RequestType.USERNAME_TAKEN:
+            print("ERROR: USERNAME_TAKEN")
+        elif req == RequestType.NEW_MESSAGE:
             #display message and add to database
-            #daniel
-            print(req.content)
-            self.msgDatabase.append(req.content)
-            pass
-
+            print(server_request.content)
+            print(server_request.content.msg_sender + " > " + server_request.content.message)
+            #print on GUI
+            #daniel save to database
+            self.msgDatabase.append(server_request.content)
+        else:
+            print("unknown request type")
     ############# BASE ABOVE
 
     def send_LOGIN_request(self):
