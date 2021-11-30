@@ -3,7 +3,7 @@
 import sys,time
 from PyQt5 import QtGui
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QScrollBar,QSplitter,QTableWidgetItem,QTableWidget,QComboBox,QVBoxLayout,QGridLayout,QDialog,QWidget, QPushButton, QApplication, QMainWindow,QAction,QMessageBox,QLabel,QTextEdit,QProgressBar,QLineEdit
+from PyQt5.QtWidgets import QInputDialog ,QScrollBar,QSplitter,QTableWidgetItem,QTableWidget,QComboBox,QVBoxLayout,QGridLayout,QDialog,QWidget, QPushButton, QApplication, QMainWindow,QAction,QMessageBox,QLabel,QTextEdit,QProgressBar,QLineEdit
 from PyQt5.QtCore import QCoreApplication
 import socket
 from threading import Thread 
@@ -79,6 +79,66 @@ class Window(QWidget, Client):
         textFormatted='{:<80}'.format(text)
         self.chat.append(textFormatted)
 
+    def closeEvent(self, event):
+        print("close x")
+        m = Mess("", "", "", "")
+        self.send_request(RequestType.DISCONNECT, m)
+        self.tcp_client.close()
+        self.loggedInFlag = False
+        self.receiverON = False
+
+    def gettext(self, t):
+        text, ok = QInputDialog.getText(self, 'Text Input Dialog', t)
+        if ok:
+            return text
+
+
+    def startGUI(self):
+        address = (SERVER, PORT)
+
+        print("[INFO:CLIENT] Starting client app...")
+        self.tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print("[INFO:CLIENT] Connecting to server...")
+        self.tcp_client.connect(address)
+
+        self.receiverON = True
+        thread = threading.Thread(target=self.client_receiver, args=(self.tcp_client, self.loggedInFlag))
+        thread.start()
+
+        while not self.loggedInFlag:
+            #print("Enter your nickname")
+            #self.nickname = input()
+            #print("Enter your password")
+            #password = input()
+
+            self.nickname = ""
+            self.password = ""
+
+
+
+            while self.nickname == "" or  self.password == "":
+                self.nickname=self.gettext("Enter your nickname")
+                self.password = self.gettext("Enter your password")
+
+
+            self.send_request(RequestType.LOG_IN, LogIn(self.nickname, self.password))
+
+            wait_iterator = 0
+            while not self.loggedInFlag and wait_iterator < 10:
+                time.sleep(0.5)
+                wait_iterator += 1
+
+            if wait_iterator >= 10:
+                print("server unreachable or wrong login data")
+                # gui pop
+
+        # after log_in
+        print("[INFO:CLIENT] After log_in...")
+        # daniel wczytanie bazy do msgDatabase i wypisanie jej na ekran
+
+
+
+
 #    def print_msg(self, auth, msg):
 #        dupsko(req.content.msg_sender, req.content.message)
 
@@ -86,5 +146,5 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = Window()
     window.show()
-    window.start()
+    window.startGUI()
     sys.exit(app.exec_())
