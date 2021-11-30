@@ -6,7 +6,7 @@ def scrub(query_data):
 
 
 def connect():
-    return sqlite3.connect('clientDB.db')
+    return sqlite3.connect('tDB.db')
 
 
 def setup_database():
@@ -39,6 +39,7 @@ def start_conversation(name, creator_id, creator_name, no_history):
               CREATE TABLE IF NOT EXISTS {}
               ([message_id] INTEGER PRIMARY KEY AUTOINCREMENT, 
               [sender] TEXT,
+              [receiver] TEXT,
               [time] INTEGER,  
               [data] TEXT)
               '''.format(name_clean)
@@ -142,7 +143,7 @@ def remove_user(name, user_id):
     con.close()
 
 
-def save_message(name, sender, time, data):
+def save_message(name, sender, receiver, time, data):
     con = connect()
     c = con.cursor()
 
@@ -156,10 +157,10 @@ def save_message(name, sender, time, data):
 
     name_clean = scrub(name)
     query = '''
-          INSERT INTO {} (sender, time, data)
-          VALUES (?, ?, ?)
+          INSERT INTO {} (sender, receiver, time, data)
+          VALUES (?, ?, ?, ?)
           '''.format(name_clean)
-    c.execute(query, [sender, time, data])
+    c.execute(query, [sender, receiver, time, data])
 
     con.commit()
     con.close()
@@ -223,6 +224,8 @@ if __name__ == "__main__":
     # con = connect()
     # c = con.cursor()
     # print(c.execute('SELECT * FROM  "t"').fetchall())
+    setup_database()
+    save_message("cd", "b", "c", 11, "aaaa")
 
-    # print(get_all_data())
+    print(get_all_data())
     print("--------------")
