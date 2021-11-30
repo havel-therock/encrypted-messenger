@@ -94,7 +94,7 @@ class Client:
         req = server_request.request_type
 
         if req == RequestType.LOG_IN:
-            a = server_request.content.email
+            a = server_request.content.nickname
             b = server_request.content.passwd
             if a == "OK":
                 self.loggedInFlag = True

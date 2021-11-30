@@ -1,14 +1,14 @@
 class Mess:
   def __init__(self, msg_sender, msg_reciver, msg_hash, message):
-    self.msg_sender = msg_sender
-    self.msg_reciver = msg_reciver
-    self.msg_hash = msg_hash
+    self.msg_sender = msg_sender    # nickname
+    self.msg_reciver = msg_reciver  # nickname
+    self.msg_hash = msg_hash        # message_hash
     self.message = message
 
 
 class LogIn:
-    def __init__(self, email, passwd):
-        self.email = email
+    def __init__(self, nickname, passwd):
+        self.nickname = nickname
         self.passwd = passwd
 
 class Request:
