@@ -121,7 +121,7 @@ class Client:
             print("unknown request type")
 
     def print_msg(self,sender,receiver,msg):
-        text = "({} -> {}): {}".format(sender,receiver,msg)
+        print("({} -> {}): {}".format(sender,receiver,msg))
 
     def send_LOGIN_request(self):
         self.send_request(RequestType.LOG_IN, LogIn("client@gmail.com", "super-tajne-hasło"))
