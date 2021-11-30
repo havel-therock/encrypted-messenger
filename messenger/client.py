@@ -1,12 +1,14 @@
+#!/usr/bin/env python3
+
 import socket
 import hashlib
 import pickle
 import threading
 import time
 from pathlib import Path
-from messenger.common.constants import SERVER, PORT, FORMAT, HEADER_SIZE
-from messenger.common.communication import Request, Mess, LogIn
-from messenger.common.constants import RequestType
+from common.constants import SERVER, PORT, FORMAT, HEADER_SIZE
+from common.communication import Request, Mess, LogIn
+from common.constants import RequestType
 
 
 class Client:
@@ -111,3 +113,8 @@ class Client:
 
     def send_LOGIN_request(self):
         self.send_request(RequestType.LOG_IN, LogIn("client@gmail.com", "super-tajne-hasło"))
+
+if __name__ == "__main__":
+    client = Client()
+    client.start()
+    #  client.send_LOGIN_request()

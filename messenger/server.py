@@ -1,9 +1,11 @@
+#!/usr/bin/env python3
+
 import socket
 import threading
 import hashlib
 import pickle
-from messenger.common.constants import RequestType, PORT, HEADER_SIZE, FORMAT
-from messenger.common.communication import Request
+from common.constants import RequestType, PORT, HEADER_SIZE, FORMAT
+from common.communication import Request
 
 class Server:
 
@@ -187,3 +189,8 @@ class User:
         self.thread = None
         if "conn_status" in kwargs:
             self.conn_status = kwargs["conn_status"]
+
+if __name__ == "__main__":
+    # Starting server
+    server = Server()
+    server.start()
