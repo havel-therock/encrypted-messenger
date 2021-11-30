@@ -26,7 +26,7 @@ def start_conversation(name, creator_id, creator_name, no_history):
     con = connect()
     c = con.cursor()
     name_clean = scrub(name)
-    creator_id_clean = int(scrub(str(creator_id)))
+    creator_id_clean = scrub(creator_id)
     creator_name_clean = scrub(creator_name)
     no_history_clean = int(scrub(str(no_history)))
 
@@ -38,7 +38,7 @@ def start_conversation(name, creator_id, creator_name, no_history):
     query = '''
               CREATE TABLE IF NOT EXISTS {}
               ([message_id] INTEGER PRIMARY KEY AUTOINCREMENT, 
-              [sender] INTEGER,
+              [sender] TEXT,
               [time] INTEGER,  
               [data] TEXT)
               '''.format(name_clean)
@@ -46,7 +46,7 @@ def start_conversation(name, creator_id, creator_name, no_history):
 
     query = '''
               CREATE TABLE IF NOT EXISTS {}
-              ([user_id] INTEGER PRIMARY KEY, 
+              ([user_id] TEXT PRIMARY KEY, 
               [name] TEXT,
               [status] INTEGER )
               '''.format(name_clean + "_users")
@@ -152,7 +152,7 @@ def save_message(name, sender, time, data):
               ''', [name]).fetchall()
 
     if len(temp) == 0:
-        start_conversation(name, sender, str(sender), 0)
+        start_conversation(name, sender, sender, 0)
 
     name_clean = scrub(name)
     query = '''

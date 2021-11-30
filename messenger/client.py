@@ -5,11 +5,11 @@ import hashlib
 import pickle
 import threading
 import time
+import clientDBHandler
 from pathlib import Path
 from common.constants import SERVER, PORT, FORMAT, HEADER_SIZE
 from common.communication import Request, Mess, LogIn
 from common.constants import RequestType
-from clientDBHandler import *
 
 
 class Client:
@@ -20,6 +20,7 @@ class Client:
     def __init__(self):
         self.tcp_client = None
         clientDBHandler.setup_database()
+        print("a")
         # self.udp_client = ? For audio and video chats
 
     def start(self):
