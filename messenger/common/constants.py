@@ -19,3 +19,4 @@ class RequestType(Enum):
     UPDATE_CONVERSATION = 5
     USERNAME_TAKEN = 6
     NEW_MESSAGE = 7
+    LOG_IN__OK = 8

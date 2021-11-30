@@ -141,6 +141,7 @@ class Server:
                 self.notify_client(user, RequestType.USERNAME_TAKEN, None)
                 return
         self.active_users.append(user)
+        self.notify_client(user, RequestType.LOG_IN__OK, None)
 
     def action_login(self, user):
         print("LogIn")
