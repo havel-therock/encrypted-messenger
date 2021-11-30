@@ -25,6 +25,9 @@ if __name__ == "__main__":
     path = Path(dir_path)
     sys.path.append(str(path.parent.absolute()))
     # END OF SETUP
+    # IMPORTS
+    # ...
+    # END OF IMPORTS
 
     # TESTS
     run_test("../tests/component-tests/module1")
