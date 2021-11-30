@@ -9,6 +9,7 @@ from pathlib import Path
 from common.constants import SERVER, PORT, FORMAT, HEADER_SIZE
 from common.communication import Request, Mess, LogIn
 from common.constants import RequestType
+from clientDBHandler import *
 
 
 class Client:
@@ -18,10 +19,10 @@ class Client:
 
     def __init__(self):
         self.tcp_client = None
+        clientDBHandler.setup_database()
         # self.udp_client = ? For audio and video chats
 
     def start(self):
-
         address = (SERVER, PORT)
 
         print("[INFO:CLIENT] Starting client app...")
@@ -53,6 +54,10 @@ class Client:
         # after log_in
         print("[INFO:CLIENT] After log_in...")
         # daniel wczytanie bazy do msgDatabase i wypisanie jej na ekran
+        tmp = clientDBHandler.get_all_data()
+        for msg in tmp:
+            self.msgDatabase.append(msg)
+
         while self.loggedInFlag:
             print("Enter receiver")
             receiver = input()
@@ -104,6 +109,10 @@ class Client:
             self.print_msg(server_request.content.msg_sender,
                            server_request.content.message)
             #daniel save to database
+            clientDBHandler.save_message(server_request.content.msg_sender,
+                                         server_request.content.msg_sender,
+                                         round(time.time() * 1000),
+                                         server_request.content.message)
             self.msgDatabase.append(server_request.content)
         else:
             print("unknown request type")

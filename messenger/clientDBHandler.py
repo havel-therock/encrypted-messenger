@@ -145,6 +145,15 @@ def remove_user(name, user_id):
 def save_message(name, sender, time, data):
     con = connect()
     c = con.cursor()
+
+    temp = c.execute('''
+              SELECT * FROM conversations 
+              WHERE name = ?
+              ''', [name]).fetchall()
+
+    if len(temp) == 0:
+        start_conversation(name, sender, str(sender), 0)
+
     name_clean = scrub(name)
     query = '''
           INSERT INTO {} (sender, time, data)
@@ -188,7 +197,26 @@ def get_all_messages(name):
     query = '''
               SELECT * FROM {} 
               '''.format(name_clean)
-    return c.execute(query).fetchall()
+    return list(c.execute(query).fetchall())
+
+
+def get_all_data():
+    con = connect()
+    c = con.cursor()
+    cnv = list(c.execute('''
+              SELECT name FROM conversations 
+              ''').fetchall())
+    msg_list = []
+    for conv_name in cnv:
+        query = '''
+              SELECT * FROM {} 
+              '''.format(conv_name[0])
+        c.execute(query)
+
+        for msg in c:
+            msg_list.append(msg)
+
+    return msg_list
 
 
 if __name__ == "__main__":
@@ -196,4 +224,5 @@ if __name__ == "__main__":
     # c = con.cursor()
     # print(c.execute('SELECT * FROM  "t"').fetchall())
 
+    # print(get_all_data())
     print("--------------")
