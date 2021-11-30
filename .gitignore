@@ -8,6 +8,9 @@
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+# Local databases
+*.db
+
 # Custom trash folders
 Ignore/
 ignore/
