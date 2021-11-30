@@ -66,13 +66,13 @@ class Window(QWidget, Client):
         text=self.chatTextField.text()
         tmp = text.split(maxsplit=1)
         if len(tmp)>1:
-            self.print_msg(tmp[0], tmp[1])
+            self.print_msg(self.nickname, tmp[0], tmp[1])
             m = Mess(self.nickname, tmp[0], "hash", tmp[1])
             self.send_request(RequestType.SEND_MSG, m)
             self.chatTextField.setText("")
         
-    def print_msg(self,auth,msg):
-        text=auth + " > " + msg
+    def print_msg(self,sender,receiver,msg):
+        text = "[{} -> {}] {}".format(sender,receiver,msg)
         font=self.chat.font()
         font.setPointSize(13)
         self.chat.setFont(font)

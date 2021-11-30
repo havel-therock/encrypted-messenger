@@ -108,6 +108,7 @@ class Client:
             #display message and add to database
             #print(server_request.content)
             self.print_msg(server_request.content.msg_sender,
+                           self.nickname,
                            server_request.content.message)
             #daniel save to database
             clientDBHandler.save_message(server_request.content.msg_sender,
@@ -118,8 +119,8 @@ class Client:
         else:
             print("unknown request type")
 
-    def print_msg(self,auth,msg):
-        print(auth + " > " + msg)
+    def print_msg(self,sender,receiver,msg):
+        text = "({} -> {}): {}".format(sender,receiver,msg)
 
     def send_LOGIN_request(self):
         self.send_request(RequestType.LOG_IN, LogIn("client@gmail.com", "super-tajne-hasło"))
