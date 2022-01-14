@@ -1,5 +1,4 @@
-import enum
-from enum import Enum, auto
+from enum import Enum
 
 HEADER_SIZE = 64
 PORT = 6665
@@ -20,3 +19,4 @@ class RequestType(Enum):
     USERNAME_TAKEN = 6
     NEW_MESSAGE = 7
     LOG_IN__OK = 8
+    SERVER_SHUTDOWN = 9
