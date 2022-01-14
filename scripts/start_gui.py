@@ -2,7 +2,7 @@
 import os
 import sys
 from pathlib import Path
-
+import PyQt5
 
 if __name__ == "__main__":
     # SETUP
@@ -11,12 +11,12 @@ if __name__ == "__main__":
     sys.path.append(str(path.parent.absolute()) + "/")
     # END OF SETUP
     # IMPORTS
-    from messenger.client.gui import *
+    import messenger.client.gui as gui
     # END OF IMPORTS
 
     # Starting GUI
-    app = QApplication(sys.argv)
-    window = Window()
+    app = gui.QApplication(sys.argv)
+    window = gui.Window()
     window.show()
-    window.start()
+    window.startGUI()
     sys.exit(app.exec_())

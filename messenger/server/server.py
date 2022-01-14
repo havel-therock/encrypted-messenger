@@ -2,10 +2,13 @@
 
 import socket
 import threading
-import hashlib
 import pickle
-from common.constants import RequestType, PORT, HEADER_SIZE, FORMAT
-from common.communication import Request
+import urllib.request
+
+from .user import User
+from messenger.common.constants import RequestType, PORT, HEADER_SIZE, FORMAT
+from messenger.common.communication import Request
+
 
 class Server:
 
@@ -53,7 +56,7 @@ class Server:
         # clean_up all clients.... maybe send the message server is going to sleep...
         # disconnect them close connection to data base ensure every process that is running is stopped properly
         self.server_running = False
-        #connect closing dummy client for passing socket.accept() stuck
+        # connect closing dummy client for passing socket.accept() stuck
 
     def get_clients_by_ip(self, ip_addr):
         for user in self.active_users:
@@ -179,8 +182,10 @@ class Server:
 
 
 # move class to another module?
+'''
 class User:
     def __init__(self, user_id, connection_socket, ip_addr, **kwargs):
+        # self.user_active = True
         self.user_id = user_id
         self.user_passwd = ""
         self.conn_socket = connection_socket
@@ -194,3 +199,12 @@ if __name__ == "__main__":
     # Starting server
     server = Server()
     server.start()
+'''
+
+# SERVER TYPE OF ACCTIONS:
+# 0. Internal work              functions server_*
+# 1. Hearing from clients       functions cli_action_* (work triggered by client request)
+# 2. Notifing client            functions cli_request_*
+# 3. Pushing to database        functions db_request_*
+# 4. Getting from database      functions db_action_*
+# hearing jobs and delegating to proper actions/requests           functions (server_)handle_client_/_db_*

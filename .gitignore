@@ -101,6 +101,7 @@ atlassian-ide-plugin.xml
 # Others
 .idea/$CACHE_FILE$
 .idea/httpRequests
+.idea/**
 *.iws
 
 # Files modified on every interpreter change

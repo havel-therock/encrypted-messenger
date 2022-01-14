@@ -1,26 +1,22 @@
 #!/usr/bin/env python3
 
-import sys,time
-from PyQt5 import QtGui
+import sys
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QInputDialog ,QScrollBar,QSplitter,QTableWidgetItem,QTableWidget,QComboBox,QVBoxLayout,QGridLayout,QDialog,QWidget, QPushButton, QApplication, QMainWindow,QAction,QMessageBox,QLabel,QTextEdit,QProgressBar,QLineEdit
-from PyQt5.QtCore import QCoreApplication
-import socket
-from threading import Thread 
-from socketserver import ThreadingMixIn 
-from client import *
+from PyQt5.QtWidgets import QInputDialog , QSplitter, QVBoxLayout, QWidget, QPushButton, QApplication, QTextEdit, \
+    QLineEdit
+
+from . import clientDBHandler
+from .client import Client
 
 import socket
-import hashlib
-import pickle
 import threading
 import time
-from pathlib import Path
-from common.constants import SERVER, PORT, FORMAT, HEADER_SIZE
-from common.communication import Request, Mess, LogIn
-from common.constants import RequestType
+from messenger.common.constants import SERVER, PORT
+from messenger.common.communication import Mess, LogIn
+from messenger.common.constants import RequestType
 
 tcpClientA=None
+
 
 class Window(QWidget, Client):
     def __init__(self):
