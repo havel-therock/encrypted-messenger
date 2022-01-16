@@ -20,3 +20,4 @@ class RequestType(Enum):
     NEW_MESSAGE = 7
     LOG_IN__OK = 8
     SERVER_SHUTDOWN = 9
+    PING_CLIENT = 10

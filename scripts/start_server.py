@@ -8,7 +8,7 @@ if __name__ == "__main__":
     dir_path = os.path.dirname(os.path.realpath(__file__))
     path = Path(dir_path)
     sys.path.append(str(path.parent.absolute()) + "/")
-    print(sys.path)
+    # print(sys.path)
     # END OF SETUP
     # IMPORTS
     from messenger.server.server import Server

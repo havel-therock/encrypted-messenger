@@ -3,6 +3,7 @@
 import socket
 import threading
 import pickle
+import time
 import urllib.request
 
 from .user import User
@@ -24,6 +25,7 @@ class Server:
         self.ip_address = socket.gethostbyname(socket.gethostname())
         self.port = PORT
         self.server_running = True
+        self.admin_user = None
 
         if "header_size" in kwargs:
             self.header_size = kwargs["header_size"]
@@ -37,25 +39,58 @@ class Server:
             self.header_size = kwargs["header_size"]
 
     def start(self):
+        # prepare for making server reachable from outside
+        # external_ip = urllib.request.urlopen('https://ident.me').read().decode('utf8')
+        # print(external_ip)
+        #
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.bind((self.ip_address, self.port))
         print("[INFO:SERVER] Starting server...")
         server.listen()
         print(f"[INFO:SERVER] Server is listening on {self.ip_address}")
+
+        # activate commandline for admin
+        thread = threading.Thread(target=self.start_admin_commandline)
+        thread.start()
+
+        # main server loop
         while self.server_running:
             conn, ip_addr = server.accept()
-            user = User(None, conn, ip_addr)
+            user = User(conn, ip_addr)
             thread = threading.Thread(target=self.handle_client, args=(user, ))
             user.thread = thread
             thread.start()
-            print(f"[INFO] ACTIVE CONNECTIONS: {threading.active_count() - 1}")
-        socket.close()
+            print(f"[INFO] ACTIVE CONNECTIONS: {threading.active_count() - 2}.")
+        while threading.active_count() > 1:
+            print(f"[INFO] ACTIVE CONNECTIONS: {threading.active_count() - 1}.")
+            time.sleep(5)
+        print("[INFO] All clients disconnected. Server shutdown...")
+        self.admin_user.close()
+        server.close()
+
+    # very convenient for development, but admin has all power on Server (can call every function)
+    def start_admin_commandline(self):
+        while self.server_running:
+            command = input().split()
+            try:
+                if command:
+                    server_func = getattr(Server, command[0])
+                    args = command[1:]
+                    server_func(self, *args)
+            except AttributeError:
+                print(f"{command[0]}() is not a valid function in Server")
+            except TypeError:
+                print(f"You passed wrong number of arguments in to {command[0]}() function")
 
     def shut_down(self):
-        # TO DO
-        # clean_up all clients.... maybe send the message server is going to sleep...
-        # disconnect them close connection to data base ensure every process that is running is stopped properly
         self.server_running = False
+        self.admin_user = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.admin_user.connect((self.ip_address, self.port))
+        for user in self.active_users:
+            self.notify_client(user, RequestType.SERVER_SHUTDOWN, None)
+            user.active = False
+            # disconnect them close connection to data base ensure every process that is running is stopped properly
+
         # connect closing dummy client for passing socket.accept() stuck
 
     def get_clients_by_ip(self, ip_addr):
@@ -81,34 +116,31 @@ class Server:
     def handle_client(self, user):
         print(f"[INFO] {user.ip_addr} connected.")
         conn = user.conn_socket
-        ip_addr = user.ip_addr
-        connected = True
-        # to debug clients that are closed by sigkill and before timeout is reached...
-        # why they are not cleared?
-        while connected:
+        user_reachable = True
+        disconnect_counter = 0
+        while user.active:
+            if disconnect_counter > 50:
+                self.action_disconnect(user)
             try:
-                conn.settimeout(300) # timeout for inactive users set here like 300 sec (5min)
+                conn.settimeout(5)  # timeout for inactive users set here like 300 sec (5min)
                 msg_length = conn.recv(self.header_size).decode(self.format)
-                conn.settimeout(None)
-            except socket.timeout:
-                print(ip_addr, " timeouted")
-                msg_length = ""
-                self.action_disconnect(user)  # replace later with ping check - If client not respond in 30 seconds disconnect them
-            if msg_length:
-                msg_length = int(msg_length)
-                try:
-                    conn.settimeout(60)  # in production extend to 60 sec
+                if msg_length:
+                    msg_length = int(msg_length)
                     pickled_msg = conn.recv(msg_length)
-                    conn.settimeout(None)
                     self.handle_action(pickled_msg, user)
-                except socket.timeout:
-                    print(ip_addr, " timeouted second place")
-                    # user hung... sent HEADER but not DATA... disconnect this user
+                    user_reachable = True
+                    disconnect_counter = 0
+                else:
+                    disconnect_counter += 1
+
+            except socket.timeout:
+                if not user_reachable:
                     self.action_disconnect(user)
-            if user.conn_status == "disconnect":
-                connected = False
-        if user in self.active_users:
-            self.active_users.remove(user)
+                else:
+                    print(f"[INFO-DEBUG] Check if {user.ip_addr} is active.")
+                    user_reachable = False
+                    self.ping_client(user)
+        print(f"[INFO] User: {user.ip_addr} has been disconnected.")
         conn.close()
 
     def handle_action(self, pickled_client_request, user):
@@ -122,17 +154,17 @@ class Server:
         #if req_type == RequestType.LOG_IN:
         #    self.action_login(user, client_request)
         #el
-        if req_type == RequestType.LOG_IN:  # RequestType.REGISTER: swap to aligin to tmp client
+        if req_type == RequestType.LOG_IN:  # RequestType.REGISTER: swap to align to tmp client
             self.action_register(user, client_request)
         elif req_type == RequestType.DISCONNECT:
             self.action_disconnect(user)
         elif user in self.active_users:
             if req_type == RequestType.SEND_MSG:
-                self.action_send_message(user, client_request) # change later to passing only content
+                self.action_send_message(user, client_request)  # change later to passing only content
             # uncomment in production server, during dev-phase it is useful to not disconnect gibberish clients
             else:  # if clients talk non-existing requests -> disconnect them
                 print("user <", user.user_id, "> send nonsense request -->", req_type)
-                #self.action_disconnect(user)
+                #  self.action_disconnect(user)
         else:
             print("user <", user.user_id, "> not in active users")
             self.action_disconnect(user)
@@ -165,8 +197,9 @@ class Server:
     def action_disconnect(self, user_to_disconnect):
         if user_to_disconnect in self.active_users:
             self.active_users.remove(user_to_disconnect)
-        user_to_disconnect.conn_status = "disconnect"
+        user_to_disconnect.active = False
 
+# Requests from server to client.
     @staticmethod
     def notify_client(user, req_type, req_data):
         req = Request(req_type, req_data)
@@ -176,6 +209,9 @@ class Server:
         header += b' ' * (HEADER_SIZE - len(header))
         user.conn_socket.send(header)
         user.conn_socket.send(pickled_req)
+
+    def ping_client(self, user):
+        self.notify_client(user, RequestType.PING_CLIENT, None)
 
 # figure out method for detecting disconnected clients which has not log out properly by sending DISCONNECT_MESSAGE
 # probably ping  every 5 minutes all inactive user if they are online... If no response... remove them from active users list and kill their thread
