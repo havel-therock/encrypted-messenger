@@ -1,23 +1,27 @@
-from enum import Enum
+from enum import Enum, auto
 
 HEADER_SIZE = 64
-PORT = 6665
+PORT = 6666
 FORMAT = "utf-8"
 SERVER = "127.0.1.1"
 
 
 class RequestType(Enum):
 
+    def _generate_next_value_(name, start, count, last_values):
+        return name
+
     #  Clients requests for server
-    LOG_IN = 1
-    REGISTER = 2
-    SEND_MSG = 3
-    DISCONNECT = 4
+    LOG_IN = auto()
+    REGISTER = auto()
+    SEND_MSG = auto()
+    DISCONNECT = auto()
+    PONG = auto()  # answer to PING
 
     #  Server requests for client
-    UPDATE_CONVERSATION = 5
-    USERNAME_TAKEN = 6
-    NEW_MESSAGE = 7
-    LOG_IN__OK = 8
-    SERVER_SHUTDOWN = 9
-    PING_CLIENT = 10
+    UPDATE_CONVERSATION = auto()
+    USERNAME_TAKEN = auto()
+    NEW_MESSAGE = auto()
+    LOG_IN__OK = auto()
+    SERVER_SHUTDOWN = auto()
+    PING = auto()  # check if client alive
