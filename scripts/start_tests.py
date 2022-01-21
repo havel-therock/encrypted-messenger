@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 import sys
 import glob
@@ -22,8 +23,8 @@ def run_test(path):
 if __name__ == "__main__":
     # SETUP
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    path = Path(dir_path)
-    sys.path.append(str(path.parent.absolute()))
+    cur_path = Path(dir_path)
+    sys.path.append(str(cur_path.parent.absolute()))
     # END OF SETUP
     # IMPORTS
     # ...

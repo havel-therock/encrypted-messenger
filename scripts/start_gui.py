@@ -2,7 +2,6 @@
 import os
 import sys
 from pathlib import Path
-import PyQt5
 
 if __name__ == "__main__":
     # SETUP
