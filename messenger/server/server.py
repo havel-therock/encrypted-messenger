@@ -7,8 +7,9 @@ import time
 import urllib.request
 
 from .user import User
-from messenger.common.constants import RequestType, PORT, HEADER_SIZE, FORMAT
-from messenger.common.communication import Request, LogInContent
+from messenger.comm.constants import PORT, HEADER_SIZE, FORMAT
+from messenger.comm.req.request import Request, RequestType
+from messenger.comm.req.request_content import LogInContent
 
 
 class Server:
@@ -55,8 +56,8 @@ class Server:
 
         # main server loop
         while self.server_running:
-            conn, ip_addr = server.accept()
-            user = User(conn, ip_addr)
+            conn, ip_address = server.accept()
+            user = User(conn, ip_address)
             thread = threading.Thread(target=self.handle_client, args=(user, ))
             user.thread = thread
             thread.start()
@@ -96,31 +97,32 @@ class Server:
 # END OF INTERNAL SERVER FUNCTIONS ###
 
 # SERVER UTILITY FUNCTIONS ### # make them _private?
-    def get_clients_by_ip(self, ip_addr):
+    def get_clients_by_ip(self, ip_address):
         for user in self.active_users:
-            if user.ip_address == ip_addr:
+            if user.ip_address == ip_address:
                 return user
         return None
 
-    def check_connection(self, ip_addr):
+    def check_connection(self, ip_address):
         for user in self.active_users:
-            if user.ip_address == ip_addr:
+            if user.ip_address == ip_address:
                 if user.conn_status == "disconnected":
                     return False
                 else:
                     return True
         return True
 
-    def remove_user(self, ip_addr):
+    def remove_user(self, ip_address):
         for user in self.active_users:
-            if user.ip_address == ip_addr:
+            if user.ip_address == ip_address:
                 self.active_users.remove(user)
 
 # END OF SERVER UTILITY FUNCTIONS ###
 
 # USER THREAD FUNCTION ###
     def handle_client(self, user):
-        print(f"[INFO] {user.ip_addr} connected.")
+        print(f"[INFO] {user.ip_address} connected.")
+        self.active_users.append(user)
         conn = user.conn_socket
         user_reachable = True
         disconnect_counter = 0
@@ -128,7 +130,8 @@ class Server:
             if disconnect_counter > 100:
                 self.action_disconnect(user)
             try:
-                conn.settimeout(10)  # timeout for inactive users set here like 300 sec (5min)
+                # for dev-phase timeout small - for production set to 30 sec to not overwhelm server
+                conn.settimeout(3)  # timeout for inactive users set here like 300 sec (5min)
                 msg_length = conn.recv(self.header_size).decode(self.format)
                 if msg_length:
                     msg_length = int(msg_length)
@@ -145,10 +148,10 @@ class Server:
                 if not user_reachable:
                     self.action_disconnect(user)
                 else:
-                    print(f"[INFO-DEBUG] Check if {user.ip_addr} is active.")
+                    print(f"[INFO-DEBUG] Check if {user.ip_address} is active.")
                     user_reachable = False
                     self.ping_client(user)
-        print(f"[INFO] User: {user.ip_addr} has been disconnected.")
+        print(f"[INFO] User: {user.ip_address} has been disconnected.")
         conn.close()
 
 # USER TASK DELEGATING FUNCTION ###
@@ -159,10 +162,11 @@ class Server:
             return
 
         req_type = client_request.request_type
-        ####
+        #### TO delete in future. To comment out when want to use admin console easy
         print(client_request.request_type)
         print(client_request.content)
         ####
+
         #if req_type == RequestType.LOG_IN:
         #    self.action_login(user, client_request)
         #el
@@ -193,16 +197,15 @@ class Server:
         user.user_id = client_request.content.nickname
         user.user_passwd = client_request.content.passwd
         for usr in self.active_users:
-            if usr.user_id == user.user_id:
+            if usr.user_id == user.user_id and usr is not user:
                 print("[INFO] nickname TAKEN")
                 self.notify_client(user, RequestType.USERNAME_TAKEN, None)
                 return
-        self.active_users.append(user)
         self.notify_client(user, RequestType.LOG_IN__OK, None)
 
     def action_login(self, user):
         print("LogIn")
-        #user = self.get_clients_by_ip(ip_addr)
+        #user = self.get_clients_by_ip(ip_address)
         #if user is not None:
         #    user.conn_status = "active"
         #else:

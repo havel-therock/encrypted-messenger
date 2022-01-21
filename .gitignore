@@ -8,6 +8,9 @@
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+# directory
+scripts/local_purpose/**
+
 # Local databases
 *.db
 

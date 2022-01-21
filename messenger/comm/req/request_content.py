@@ -1,9 +1,3 @@
-class Request:
-    def __init__(self, request_type, content):
-        self.request_type = request_type  # class RequestType
-        self.content = content  # Any class
-
-
 class MessContent:
     def __init__(self, msg_sender, msg_receiver, msg_hash, message):
         self.msg_sender = msg_sender    # nickname
@@ -16,4 +10,3 @@ class LogInContent:
     def __init__(self, nickname, passwd):
         self.nickname = nickname
         self.passwd = passwd
-

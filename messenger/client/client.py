@@ -7,9 +7,9 @@ import threading
 import time
 from . import clientDBHandler
 from pathlib import Path
-from messenger.common.constants import SERVER, PORT, FORMAT, HEADER_SIZE
-from messenger.common.communication import Request, Mess, LogIn
-from messenger.common.constants import RequestType
+from messenger.comm.constants import SERVER, PORT, FORMAT, HEADER_SIZE
+from messenger.comm.req.request import Request, RequestType
+from messenger.comm.req.request_content import MessContent, LogInContent
 
 
 class Client:
@@ -40,7 +40,7 @@ class Client:
             self.nickname = input()
             print("Enter your password")
             password = input()
-            self.send_request(RequestType.LOG_IN, LogIn(self.nickname, password))
+            self.send_request(RequestType.LOG_IN, LogInContent(self.nickname, password))
 
 
             wait_iterator = 0
@@ -66,13 +66,13 @@ class Client:
             msg = input()
 
             if receiver == "DISCONNECT" or msg == "DISCONNECT":
-                m = Mess("", "", "", "")
+                m = MessContent("", "", "", "")
                 self.send_request(RequestType.DISCONNECT, m)
                 self.tcp_client.close()
                 self.loggedInFlag = False
                 self.receiverON = False
             else:
-                m = Mess(self.nickname, receiver, "hash", msg)
+                m = MessContent(self.nickname, receiver, "hash", msg)
                 self.send_request(RequestType.SEND_MSG, m)
                 clientDBHandler.save_message(self.nickname,
                                              self.nickname,
@@ -131,7 +131,7 @@ class Client:
         print("({} -> {}): {}".format(sender,receiver,msg))
 
     def send_LOGIN_request(self):
-        self.send_request(RequestType.LOG_IN, LogIn("client@gmail.com", "super-tajne-hasło"))
+        self.send_request(RequestType.LOG_IN, LogInContent("client@gmail.com", "super-tajne-hasło"))
 
 
 if __name__ == "__main__":

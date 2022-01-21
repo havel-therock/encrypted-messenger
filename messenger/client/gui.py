@@ -11,9 +11,9 @@ from .client import Client
 import socket
 import threading
 import time
-from messenger.common.constants import SERVER, PORT
-from messenger.common.communication import Mess, LogIn
-from messenger.common.constants import RequestType
+from messenger.comm.constants import SERVER, PORT
+from messenger.comm.req.request import RequestType
+from messenger.comm.req.request_content import MessContent, LogInContent
 
 tcpClientA=None
 
@@ -63,7 +63,7 @@ class Window(QWidget, Client):
         tmp = text.split(maxsplit=1)
         if len(tmp)>1:
             self.print_msg(self.nickname, tmp[0], tmp[1])
-            m = Mess(self.nickname, tmp[0], "hash", tmp[1])
+            m = MessContent(self.nickname, tmp[0], "hash", tmp[1])
             self.send_request(RequestType.SEND_MSG, m)
             self.chatTextField.setText("")
             clientDBHandler.save_message(self.nickname,
@@ -82,7 +82,7 @@ class Window(QWidget, Client):
 
     def closeEvent(self, event):
         print("close x")
-        m = Mess("", "", "", "")
+        m = MessContent("", "", "", "")
         self.send_request(RequestType.DISCONNECT, m)
         self.tcp_client.close()
         self.loggedInFlag = False
@@ -122,7 +122,7 @@ class Window(QWidget, Client):
                 self.password = self.gettext("Enter your password")
 
 
-            self.send_request(RequestType.LOG_IN, LogIn(self.nickname, self.password))
+            self.send_request(RequestType.LOG_IN, LogInContent(self.nickname, self.password))
 
             wait_iterator = 0
             while not self.loggedInFlag and wait_iterator < 10:

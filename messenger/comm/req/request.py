@@ -1,9 +1,10 @@
 from enum import Enum, auto
 
-HEADER_SIZE = 64
-PORT = 6666
-FORMAT = "utf-8"
-SERVER = "127.0.1.1"
+
+class Request:
+    def __init__(self, request_type, content):
+        self.request_type = request_type  # class RequestType
+        self.content = content  # Any class
 
 
 class RequestType(Enum):
