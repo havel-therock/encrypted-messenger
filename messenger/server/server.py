@@ -8,7 +8,7 @@ import urllib.request
 
 from .user import User
 from messenger.common.constants import RequestType, PORT, HEADER_SIZE, FORMAT
-from messenger.common.communication import Request
+from messenger.common.communication import Request, LogInContent
 
 
 class Server:
@@ -82,6 +82,7 @@ class Server:
             except TypeError:
                 print(f"You passed wrong number of arguments in to {command[0]}() function")
 
+# INTERNAL SERVER FUNCTIONS ###
     def shut_down(self):
         self.server_running = False
         self.admin_user = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -89,10 +90,12 @@ class Server:
         for user in self.active_users:
             self.notify_client(user, RequestType.SERVER_SHUTDOWN, None)
             user.active = False
+            # DATABASE_ON_SHUTDOWN!!!!
             # disconnect them close connection to data base ensure every process that is running is stopped properly
 
-        # connect closing dummy client for passing socket.accept() stuck
+# END OF INTERNAL SERVER FUNCTIONS ###
 
+# SERVER UTILITY FUNCTIONS ### # make them _private?
     def get_clients_by_ip(self, ip_addr):
         for user in self.active_users:
             if user.ip_address == ip_addr:
@@ -113,16 +116,19 @@ class Server:
             if user.ip_address == ip_addr:
                 self.active_users.remove(user)
 
+# END OF SERVER UTILITY FUNCTIONS ###
+
+# USER THREAD FUNCTION ###
     def handle_client(self, user):
         print(f"[INFO] {user.ip_addr} connected.")
         conn = user.conn_socket
         user_reachable = True
         disconnect_counter = 0
         while user.active:
-            if disconnect_counter > 50:
+            if disconnect_counter > 100:
                 self.action_disconnect(user)
             try:
-                conn.settimeout(5)  # timeout for inactive users set here like 300 sec (5min)
+                conn.settimeout(10)  # timeout for inactive users set here like 300 sec (5min)
                 msg_length = conn.recv(self.header_size).decode(self.format)
                 if msg_length:
                     msg_length = int(msg_length)
@@ -131,6 +137,8 @@ class Server:
                     user_reachable = True
                     disconnect_counter = 0
                 else:
+                    # when pipe is broken on client side,
+                    # it is sending continues empty messages to server
                     disconnect_counter += 1
 
             except socket.timeout:
@@ -143,9 +151,13 @@ class Server:
         print(f"[INFO] User: {user.ip_addr} has been disconnected.")
         conn.close()
 
+# USER TASK DELEGATING FUNCTION ###
     def handle_action(self, pickled_client_request, user):
         client_request = pickle.loads(pickled_client_request)
-        # dev note: python 3.10 has switch statements... older versions doesn't
+        if not isinstance(client_request, Request):
+            # action!!! new method <--- not a REQUEST OBJECT  send by client()
+            return
+
         req_type = client_request.request_type
         ####
         print(client_request.request_type)
@@ -154,8 +166,15 @@ class Server:
         #if req_type == RequestType.LOG_IN:
         #    self.action_login(user, client_request)
         #el
+        # dev note: python 3.10 has switch statements... older versions doesn't
         if req_type == RequestType.LOG_IN:  # RequestType.REGISTER: swap to align to tmp client
-            self.action_register(user, client_request)
+            if type(client_request.content) is LogInContent:
+                self.action_register(user, client_request)
+            else:
+                self.notify_client(user, RequestType.BAD_REQUEST_CONTENT, None)
+        elif req_type == RequestType.PONG:
+            # end of checking if user is active. Nothing to be done.
+            pass
         elif req_type == RequestType.DISCONNECT:
             self.action_disconnect(user)
         elif user in self.active_users:
@@ -169,6 +188,7 @@ class Server:
             print("user <", user.user_id, "> not in active users")
             self.action_disconnect(user)
 
+# CLIENT ACTIONS FUNCTIONS ###
     def action_register(self, user, client_request):
         user.user_id = client_request.content.nickname
         user.user_passwd = client_request.content.passwd
@@ -190,7 +210,7 @@ class Server:
 
     def action_send_message(self, user, client_request):
         for a_usr in self.active_users:  # later change to search through all rooms id stored in database
-            if a_usr.user_id == client_request.content.msg_reciver:
+            if a_usr.user_id == client_request.content.msg_receiver:
                 self.notify_client(a_usr, RequestType.NEW_MESSAGE, client_request.content)
         # when data base included maybe separate server thread for passing messages to clients... observer of rooms?
 
@@ -199,7 +219,9 @@ class Server:
             self.active_users.remove(user_to_disconnect)
         user_to_disconnect.active = False
 
-# Requests from server to client.
+# END OF CLIENT ACTIONS FUNCTIONS ###
+
+# MAIN METHOD FOR CONSTRUCTING AND SENDING REQUESTS TO CLIENT ###
     @staticmethod
     def notify_client(user, req_type, req_data):
         req = Request(req_type, req_data)
@@ -210,32 +232,17 @@ class Server:
         user.conn_socket.send(header)
         user.conn_socket.send(pickled_req)
 
+# SPECIFIC REQUESTS TO CLIENT
+
     def ping_client(self, user):
-        self.notify_client(user, RequestType.PING_CLIENT, None)
+        self.notify_client(user, RequestType.PING, None)
 
-# figure out method for detecting disconnected clients which has not log out properly by sending DISCONNECT_MESSAGE
-# probably ping  every 5 minutes all inactive user if they are online... If no response... remove them from active users list and kill their thread
+# END OF SPECIFIC REQUESTS TO CLIENT
 
+# SERVER REQUESTS TO DATABASE
 
-# move class to another module?
-'''
-class User:
-    def __init__(self, user_id, connection_socket, ip_addr, **kwargs):
-        # self.user_active = True
-        self.user_id = user_id
-        self.user_passwd = ""
-        self.conn_socket = connection_socket
-        self.ip_addr = ip_addr
-        self.conn_status = "active"  # active|disconnected
-        self.thread = None
-        if "conn_status" in kwargs:
-            self.conn_status = kwargs["conn_status"]
+# END SERVER REQUESTS TO DATABASE
 
-if __name__ == "__main__":
-    # Starting server
-    server = Server()
-    server.start()
-'''
 
 # SERVER TYPE OF ACCTIONS:
 # 0. Internal work              functions server_*

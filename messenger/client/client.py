@@ -107,6 +107,8 @@ class Client:
 
         if req == RequestType.LOG_IN__OK:
             self.loggedInFlag = True
+        elif req == RequestType.PING:
+            self.send_request(RequestType.PONG, None)
         elif req == RequestType.USERNAME_TAKEN:
             print("ERROR: USERNAME_TAKEN")
         elif req == RequestType.NEW_MESSAGE:
@@ -118,7 +120,7 @@ class Client:
             #daniel save to database
             clientDBHandler.save_message(server_request.content.msg_sender,
                                          server_request.content.msg_sender,
-                                         server_request.content.msg_reciver,
+                                         server_request.content.msg_receiver,
                                          round(time.time() * 1000),
                                          server_request.content.message)
             self.msgDatabase.append(server_request.content)
